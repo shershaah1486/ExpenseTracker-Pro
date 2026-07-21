@@ -1,4 +1,5 @@
 <div align="center">
+<img src="https://raw.githubusercontent.com/shershaah1486/ExpenseTracker-Pro/main/ChatGPT%20Image%20Jul%2021%2C%202026%2C%2011_23_49%20AM.png" alt="Expense Tracker Pro Banner" width="100%">
 
 # 💰 Expense Tracker Pro
 
