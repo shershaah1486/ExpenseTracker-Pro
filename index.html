@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker Pro v2</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+
+<header>
+
+    <div>
+        <h1>💰 Expense Tracker Pro</h1>
+        <p>Track your income and expenses easily.</p>
+    </div>
+
+    <div class="header-buttons">
+
+        <button id="themeBtn">
+            🌙 Dark Mode
+        </button>
+
+        <button id="pdfBtn">
+            📄 Export PDF
+        </button>
+
+        <button id="excelBtn">
+            📊 Export Excel
+        </button>
+        <button id="clearAll">
+    🗑️ Clear All
+</button>
+
+    </div>
+
+</header>
+
+<main>
+<section class="summary">
+
+<div class="card balance">
+<h3>Current Balance</h3>
+<h2 id="balance">₹0.00</h2>
+</div>
+
+<div class="card income">
+<h3>Total Income</h3>
+<h2 id="income">₹0.00</h2>
+</div>
+
+<div class="card expense">
+<h3>Total Expense</h3>
+<h2 id="expense">₹0.00</h2>
+</div>
+
+</section>
+
+<section class="dashboard">
+<div class="left-panel">
+    <h2>Add Transaction</h2>
+<input
+id="description"
+type="text"
+placeholder="Enter Description">
+<input
+id="amount"
+type="number"
+placeholder="Enter Amount (₹)">
+<select id="type">
+
+<option value="income">Income</option>
+
+<option value="expense">Expense</option>
+
+</select>
+<select id="category">
+
+<option value="Food">Food</option>
+
+<option value="Travel">Travel</option>
+
+<option value="Shopping">Shopping</option>
+
+<option value="Bills">Bills</option>
+
+<option value="Entertainment">Entertainment</option>
+
+<option value="Salary">Salary</option>
+
+<option value="Other">Other</option>
+
+</select>
+<input
+id="date"
+type="date">
+<button id="addBtn">
+➕ Add Transaction
+</button>
+</div>
+<div class="right-panel">
+    <h2>Expense Breakdown</h2>
+<canvas id="expenseChart"></canvas>
+</div>
+</section>
+<section class="history">
+    <input
+id="search"
+type="text"
+placeholder="🔍 Search by Description..."
+>
+    <h2>
+    Transaction History
+    (<span id="transactionCount">0</span>)
+</h2>
+    <table>
+        <thead>
+
+<tr>
+
+<th>Date</th>
+
+<th>Description</th>
+
+<th>Category</th>
+
+<th>Type</th>
+
+<th>Amount</th>
+
+<th>Action</th>
+
+</tr>
+
+</thead>
+<tbody id="transactionList">
+
+</tbody>
+        </table>
+    </section>
+
+
+</main>
+
+<script src="script.js"></script>
+<footer class="footer">
+    <p>Developed by <strong>Devesh Gouniyal</strong> | © 2026 Expense Tracker Pro</p>
+</footer>
+
+</body>
+</html>
