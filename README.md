@@ -1,11 +1,10 @@
 <div align="center">
-<img src="https://raw.githubusercontent.com/shershaah1486/ExpenseTracker-Pro/main/ChatGPT%20Image%20Jul%2021%2C%202026%2C%2011_23_49%20AM.png" alt="Expense Tracker Pro Banner" width="100%">
+<img src="assets/banner.png" alt="Expense Tracker Pro Banner" width="100%">
 
 # 💰 Expense Tracker Pro
 
 ### A Modern & Responsive Expense Tracking Web Application
 
-<p>
   <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white"/>
   <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white"/>
   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"/>
