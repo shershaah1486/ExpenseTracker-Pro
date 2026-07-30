@@ -70,6 +70,60 @@
 </div>
 
 </section>
+<section class="monthly-summary">
+
+  <div class="month-card">
+    <h3>📅 This Month Income</h3>
+    <h2 id="monthIncome">₹0</h2>
+  </div>
+
+  <div class="month-card">
+    <h3>📅 This Month Expense</h3>
+    <h2 id="monthExpense">₹0</h2>
+  </div>
+
+  <div class="month-card">
+    <h3>💰 This Month Savings</h3>
+    <h2 id="monthSavings">₹0</h2>
+  </div>
+
+  <div class="month-card">
+    <h3>🔥 Top Spending</h3>
+    <h2 id="topCategory">-</h2>
+  </div>
+  <div class="month-card">
+    <h3>📈 Saving Rate</h3>
+    <p id="savingRate">0%</p>
+</div>
+
+</section>
+<section class="budget-section">
+
+    <div class="budget-card">
+        <h2>🎯 Monthly Budget Goal</h2>
+
+        <input
+            type="number"
+            id="budgetInput"
+            placeholder="Enter Monthly Budget">
+
+        <button id="saveBudget">
+            💾 Save Budget
+        </button>
+
+        <h3>
+            Remaining:
+            <span id="remainingBudget">₹0.00</span>
+        </h3>
+
+        <div class="progress-container">
+            <div id="budgetProgress"></div>
+        </div>
+        <p id="budgetWarning" style="margin-top:10px;font-weight:bold;color:#ef4444;"></p>
+
+    </div>
+
+</section>
 
 <section class="dashboard">
 <div class="left-panel">

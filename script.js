@@ -6,6 +6,8 @@
 // ---------- Local Storage ----------
 let transactions =
     JSON.parse(localStorage.getItem("transactions")) || [];
+    let monthlyBudget =
+    Number(localStorage.getItem("monthlyBudget")) || 0;
 
 // ---------- Variables ----------
 let editIndex = -1;
@@ -24,6 +26,12 @@ const themeBtn = document.getElementById("themeBtn");
 const pdfBtn = document.getElementById("pdfBtn");
 const excelBtn = document.getElementById("excelBtn");
 const clearAllBtn = document.getElementById("clearAll");
+// Budget Elements
+const budgetInput = document.getElementById("budgetInput");
+const saveBudget = document.getElementById("saveBudget");
+const remainingBudget = document.getElementById("remainingBudget");
+const budgetProgress = document.getElementById("budgetProgress");
+const budgetWarning = document.getElementById("budgetWarning");
 
 // Auto Date
 date.value = new Date().toISOString().split("T")[0];
@@ -105,6 +113,13 @@ function renderTransactions() {
 
     let income = 0;
     let expense = 0;
+    // Monthly Summary
+let monthIncome = 0;
+let monthExpense = 0;
+const categoryTotals = {};
+
+const currentMonth = new Date().getMonth();
+const currentYear = new Date().getFullYear();
 
     const categoryData = {};
 
@@ -115,6 +130,21 @@ function renderTransactions() {
     );
 
     filteredTransactions.forEach((transaction, index) => {
+        const transactionDate = new Date(transaction.date);
+
+if (
+    transactionDate.getMonth() === currentMonth &&
+    transactionDate.getFullYear() === currentYear
+) {
+    if (transaction.type === "income") {
+        monthIncome += transaction.amount;
+    } else {
+        monthExpense += transaction.amount;
+
+        categoryTotals[transaction.category] =
+            (categoryTotals[transaction.category] || 0) + transaction.amount;
+    }
+}
 
         if (transaction.type === "income") {
             income += transaction.amount;
@@ -196,6 +226,81 @@ ${transaction.type === "income" ? "+" : "-"}
 
     document.getElementById("transactionCount").textContent =
         transactions.length;
+        // ===== Monthly Summary =====
+
+document.getElementById("monthIncome").textContent =
+    "₹" + monthIncome.toLocaleString("en-IN", {
+        minimumFractionDigits: 2
+    });
+
+document.getElementById("monthExpense").textContent =
+    "₹" + monthExpense.toLocaleString("en-IN", {
+        minimumFractionDigits: 2
+    });
+
+document.getElementById("monthSavings").textContent =
+    "₹" + (monthIncome - monthExpense).toLocaleString("en-IN", {
+        minimumFractionDigits: 2
+    });
+
+let topCategory = "-";
+let maxExpense = 0;
+
+for (const cat in categoryTotals) {
+    if (categoryTotals[cat] > maxExpense) {
+        maxExpense = categoryTotals[cat];
+        topCategory = cat;
+    }
+}
+
+document.getElementById("topCategory").textContent = topCategory;
+// ===== Saving Rate =====
+let savingRate = 0;
+
+if (monthIncome > 0) {
+    savingRate = ((monthIncome - monthExpense) / monthIncome) * 100;
+}
+
+document.getElementById("savingRate").textContent =
+    savingRate.toFixed(1) + "%";
+// ===== Budget Update =====
+budgetInput.value = monthlyBudget || "";
+
+const remaining = monthlyBudget - monthExpense;
+
+remainingBudget.textContent =
+    "₹" + remaining.toLocaleString("en-IN", {
+        minimumFractionDigits: 2
+    });
+
+let percent = 0;
+
+if (monthlyBudget > 0) {
+    percent = (monthExpense / monthlyBudget) * 100;
+    if (percent > 100) percent = 100;
+}
+
+budgetProgress.style.width = percent + "%";
+// ===== Budget Warning =====
+if (monthlyBudget > 0) {
+
+    if (monthExpense >= monthlyBudget) {
+
+        budgetWarning.textContent =
+            `🚨 Budget Exceeded by ₹${(monthExpense - monthlyBudget).toLocaleString("en-IN")}`;
+
+    } else if (percent >= 80) {
+
+        budgetWarning.textContent =
+            `⚠️ Warning: ${Math.round(percent)}% of your budget is used.`;
+
+    } else {
+
+        budgetWarning.textContent = "";
+
+    }
+
+}
 
     if (expenseChart) {
         expenseChart.destroy();
@@ -308,6 +413,26 @@ clearAllBtn.addEventListener("click", () => {
     transactions = [];
 
     localStorage.removeItem("transactions");
+
+    renderTransactions();
+
+});
+// ---------- Budget ----------
+saveBudget.addEventListener("click", () => {
+
+    if (budgetInput.value.trim() === "") {
+        alert("Please enter a monthly budget.");
+        return;
+    }
+
+    monthlyBudget = Number(budgetInput.value);
+
+    localStorage.setItem(
+        "monthlyBudget",
+        monthlyBudget
+    );
+
+    alert("✅ Monthly Budget Saved!");
 
     renderTransactions();
 
