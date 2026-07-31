@@ -39,6 +39,58 @@ const budgetWarning = document.getElementById("budgetWarning");
 date.value = new Date().toISOString().split("T")[0];
 
 // ---------- Add Transaction ----------
+function animateValue(elementId, endValue) {
+
+    const element = document.getElementById(elementId);
+
+    const duration = 800;
+    const stepTime = 15;
+
+    const steps = duration / stepTime;
+
+    const increment = endValue / steps;
+
+    let current = 0;
+
+    const timer = setInterval(() => {
+
+        current += increment;
+
+        if (current >= endValue) {
+
+            current = endValue;
+
+            clearInterval(timer);
+
+        }
+
+        element.textContent =
+            "₹" +
+            current.toLocaleString("en-IN", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+    }, stepTime);
+
+}
+function showToast(message, color = "#22c55e") {
+
+    const toast = document.getElementById("toast");
+
+    toast.textContent = message;
+
+    toast.style.background = color;
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+
+        toast.classList.remove("show");
+
+    }, 2500);
+
+}
 addBtn.addEventListener("click", saveTransaction);
 
 function saveTransaction() {
@@ -92,6 +144,7 @@ function saveTransaction() {
     );
 
     clearForm();
+    showToast("✅ Transaction Added Successfully");
 
     renderTransactions();
 
@@ -236,23 +289,13 @@ ${transaction.type === "income" ? "+" : "-"}
 
     const balance = income - expense;
 
-    document.getElementById("balance").textContent =
-        "₹" +
-        balance.toLocaleString("en-IN", {
-            minimumFractionDigits: 2
-        });
+    animateValue("balance", balance);
 
-    document.getElementById("income").textContent =
-        "₹" +
-        income.toLocaleString("en-IN", {
-            minimumFractionDigits: 2
-        });
+    
+    
+    animateValue("income", income);
 
-    document.getElementById("expense").textContent =
-        "₹" +
-        expense.toLocaleString("en-IN", {
-            minimumFractionDigits: 2
-        });
+    animateValue("expense", expense);
 
     document.getElementById("transactionCount").textContent =
         transactions.length;
@@ -381,6 +424,40 @@ if (monthlyBudget > 0) {
     }
 
 }
+// ===== AI Financial Advisor =====
+
+const advice = [];
+
+if (monthExpense > monthIncome && monthIncome > 0) {
+    advice.push("🚨 Reduce unnecessary expenses. Your spending is higher than your income.");
+}
+
+if (savingRate >= 30) {
+    advice.push("🎉 Excellent! Your saving rate is very healthy.");
+} else if (savingRate >= 15) {
+    advice.push("👍 Good savings! Try reaching 30% next month.");
+} else {
+    advice.push("💰 Try to save at least 20% of your income every month.");
+}
+
+if (topCategory === "Entertainment") {
+    advice.push("🎬 Entertainment is your highest expense. Consider reducing it slightly.");
+}
+
+if (topCategory === "Food") {
+    advice.push("🍔 Food is your biggest expense. Meal planning could help you save more.");
+}
+
+if (monthlyBudget > 0 && percent >= 80 && percent < 100) {
+    advice.push("⚠️ You are close to your budget limit. Spend carefully.");
+}
+
+if (monthlyBudget > 0 && percent >= 100) {
+    advice.push("🚫 You have crossed your monthly budget. Avoid non-essential expenses.");
+}
+
+document.getElementById("aiAdvice").innerHTML =
+    advice.map(item => `<p>${item}</p>`).join("");
 
 // ===== Show Insights =====
 
@@ -557,6 +634,7 @@ clearAllBtn.addEventListener("click", () => {
     transactions = [];
 
     localStorage.removeItem("transactions");
+    showToast("🗑️ All Transactions Deleted", "#ef4444");
 
     renderTransactions();
 
@@ -575,8 +653,9 @@ saveBudget.addEventListener("click", () => {
         "monthlyBudget",
         monthlyBudget
     );
+    showToast("💰 Budget Saved", "#3b82f6");
 
-    alert("✅ Monthly Budget Saved!");
+    
 
     renderTransactions();
 

@@ -493,3 +493,31 @@ button{
     font-size:16px;
     color:#e5e7eb;
 }
+/* ===== Toast Notification ===== */
+
+.toast{
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #22c55e;
+    color: white;
+    padding: 15px 22px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 10px 25px rgba(0,0,0,.35);
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateX(120%);
+    transition: all .4s ease;
+
+    z-index: 9999;
+}
+
+.toast.show{
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
