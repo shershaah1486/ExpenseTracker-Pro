@@ -12,6 +12,7 @@ let transactions =
 // ---------- Variables ----------
 let editIndex = -1;
 let expenseChart = null;
+let incomeExpenseChart = null;
 
 // ---------- Elements ----------
 const description = document.getElementById("description");
@@ -31,6 +32,7 @@ const budgetInput = document.getElementById("budgetInput");
 const saveBudget = document.getElementById("saveBudget");
 const remainingBudget = document.getElementById("remainingBudget");
 const budgetProgress = document.getElementById("budgetProgress");
+const monthFilter = document.getElementById("monthFilter");
 const budgetWarning = document.getElementById("budgetWarning");
 
 // Auto Date
@@ -118,19 +120,47 @@ let monthIncome = 0;
 let monthExpense = 0;
 const categoryTotals = {};
 
-const currentMonth = new Date().getMonth();
-const currentYear = new Date().getFullYear();
+let currentMonth;
+let currentYear;
+
+if (monthFilter.value === "") {
+
+    currentMonth = new Date().getMonth();
+    currentYear = new Date().getFullYear();
+
+} else {
+
+    const parts = monthFilter.value.split("-");
+
+    currentYear = Number(parts[0]);
+    currentMonth = Number(parts[1]) - 1;
+
+}
 
     const categoryData = {};
 
-    const filteredTransactions = transactions.filter(transaction =>
+    const filteredTransactions = transactions.filter(transaction => {
+
+    const searchMatch =
         transaction.description.toLowerCase().includes(
             search.value.toLowerCase()
-        )
-    );
+        );
+
+    if (monthFilter.value === "") {
+        return searchMatch;
+    }
+
+    const selectedMonth = monthFilter.value; // YYYY-MM
+    const transactionMonth = transaction.date.substring(0, 7);
+
+    return searchMatch && transactionMonth === selectedMonth;
+
+});
 
     filteredTransactions.forEach((transaction, index) => {
         const transactionDate = new Date(transaction.date);
+        const selectedMonth = transactionDate.getMonth();
+const selectedYear = transactionDate.getFullYear();
 
 if (
     transactionDate.getMonth() === currentMonth &&
@@ -263,10 +293,33 @@ if (monthIncome > 0) {
 
 document.getElementById("savingRate").textContent =
     savingRate.toFixed(1) + "%";
+    // ===== Smart Financial Insights =====
+
+const insights = [];
+
+if (topCategory !== "-") {
+    insights.push(`🔥 You spent the most on ${topCategory} this month.`);
+}
+
+if (monthIncome > monthExpense && monthIncome > 0) {
+    insights.push(
+        `💰 Great! You saved ₹${(monthIncome - monthExpense).toLocaleString("en-IN")} this month.`
+    );
+}
+
+if (monthExpense > monthIncome && monthIncome > 0) {
+    insights.push(
+        "⚠️ Your expenses are higher than your income this month."
+    );
+}
+
+
 // ===== Budget Update =====
 budgetInput.value = monthlyBudget || "";
+// Budget only for selected month
+const currentMonthExpense = monthExpense;
 
-const remaining = monthlyBudget - monthExpense;
+const remaining = monthlyBudget - currentMonthExpense;
 
 remainingBudget.textContent =
     "₹" + remaining.toLocaleString("en-IN", {
@@ -276,7 +329,7 @@ remainingBudget.textContent =
 let percent = 0;
 
 if (monthlyBudget > 0) {
-    percent = (monthExpense / monthlyBudget) * 100;
+    percent = (currentMonthExpense / monthlyBudget) * 100;
     if (percent > 100) percent = 100;
 }
 
@@ -284,10 +337,10 @@ budgetProgress.style.width = percent + "%";
 // ===== Budget Warning =====
 if (monthlyBudget > 0) {
 
-    if (monthExpense >= monthlyBudget) {
+    if (currentMonthExpense >= monthlyBudget) {
 
         budgetWarning.textContent =
-            `🚨 Budget Exceeded by ₹${(monthExpense - monthlyBudget).toLocaleString("en-IN")}`;
+            `🚨 Budget Exceeded by ₹${(currentMonthExpense - monthlyBudget).toLocaleString("en-IN")}`;
 
     } else if (percent >= 80) {
 
@@ -301,6 +354,40 @@ if (monthlyBudget > 0) {
     }
 
 }
+// ===== Budget Insights =====
+
+if (monthlyBudget > 0) {
+
+    const usedPercent = (currentMonthExpense / monthlyBudget) * 100;
+
+    if (usedPercent >= 100) {
+
+        insights.push(
+            `🚨 You have exceeded your monthly budget by ₹${(currentMonthExpense - monthlyBudget).toLocaleString("en-IN")}.`
+        );
+
+    } else if (usedPercent >= 80) {
+
+        insights.push(
+            `⚠️ You have used ${Math.round(usedPercent)}% of your monthly budget.`
+        );
+
+    } else {
+
+        insights.push(
+            `✅ You are within your monthly budget (${Math.round(usedPercent)}% used).`
+        );
+
+    }
+
+}
+
+// ===== Show Insights =====
+
+document.getElementById("financialInsights").innerHTML =
+    insights.length > 0
+        ? insights.map(text => `<p>${text}</p>`).join("")
+        : "<p>No insights available.</p>";
 
     if (expenseChart) {
         expenseChart.destroy();
@@ -356,6 +443,62 @@ if (monthlyBudget > 0) {
         }
 
     });
+    // ===== Income vs Expense Bar Chart =====
+
+if (incomeExpenseChart) {
+    incomeExpenseChart.destroy();
+}
+
+const incomeExpenseCtx = document
+    .getElementById("incomeExpenseChart")
+    .getContext("2d");
+
+incomeExpenseChart = new Chart(incomeExpenseCtx, {
+
+    type: "bar",
+
+    data: {
+
+        labels: ["Income", "Expense"],
+
+        datasets: [{
+
+            label: "Amount (₹)",
+
+            data: [income, expense],
+
+            backgroundColor: [
+                "#22c55e",
+                "#ef4444"
+            ]
+
+        }]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        plugins: {
+
+            legend: {
+                display: false
+            }
+
+        },
+
+        scales: {
+
+            y: {
+                beginAtZero: true
+            }
+
+        }
+
+    }
+
+});
 
 }
 // ---------- Delete ----------
@@ -395,6 +538,7 @@ function editTransaction(index) {
 
 // ---------- Search ----------
 search.addEventListener("input", renderTransactions);
+monthFilter.addEventListener("change", renderTransactions);
 
 // ---------- Dark Mode ----------
 themeBtn.addEventListener("click", () => {

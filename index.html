@@ -70,6 +70,13 @@
 </div>
 
 </section>
+<div class="filter-section">
+    <label for="monthFilter">
+        <strong>📅 Select Month:</strong>
+    </label>
+
+    <input type="month" id="monthFilter">
+</div>
 <section class="monthly-summary">
 
   <div class="month-card">
@@ -124,6 +131,17 @@
     </div>
 
 </section>
+<section class="insights-section">
+
+    <h2>💡 Smart Financial Insights</h2>
+
+    <div id="financialInsights" class="insight-box">
+
+        <p>No insights available.</p>
+
+    </div>
+
+</section>
 
 <section class="dashboard">
 <div class="left-panel">
@@ -170,6 +188,9 @@ type="date">
 <div class="right-panel">
     <h2>Expense Breakdown</h2>
 <canvas id="expenseChart"></canvas>
+<h2 style="margin-top:30px;">📊 Income vs Expense</h2>
+
+<canvas id="incomeExpenseChart"></canvas>
 </div>
 </section>
 <section class="history">

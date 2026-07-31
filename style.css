@@ -76,6 +76,12 @@ main{
     padding:25px;
     border-radius:12px;
     box-shadow:0 4px 12px rgba(0,0,0,.3);
+    transition: all .3s ease;
+cursor: pointer;
+}
+.card:hover{
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,.45);
 }
 
 .balance{
@@ -352,11 +358,15 @@ button{
     border-radius:15px;
     text-align:center;
     box-shadow:0 5px 15px rgba(0,0,0,0.2);
-    transition:0.3s;
+    .month-card:hover{
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,.45);
+}
 }
 
 .month-card:hover{
-    transform:translateY(-5px);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,.45);
 }
 
 .month-card h3{
@@ -419,4 +429,67 @@ button{
     height:100%;
     background:#22c55e;
     transition:0.5s;
+}
+/* ===== Month Filter ===== */
+
+.filter-section{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    margin:25px 0;
+    background:#1f2937;
+    padding:18px 22px;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,.25);
+    transition:all .3s ease;
+}
+
+.filter-section:hover{
+    transform:translateY(-4px);
+    box-shadow:0 10px 25px rgba(0,0,0,.35);
+}
+
+.filter-section label{
+    font-size:18px;
+    font-weight:bold;
+    color:white;
+}
+
+#monthFilter{
+    padding:10px 15px;
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+    background:#111827;
+    color:white;
+    outline:none;
+}
+/* ===== Smart Financial Insights ===== */
+
+.insights-section{
+    margin:30px 0;
+}
+
+.insights-section h2{
+    margin-bottom:15px;
+    color:#ffffff;
+}
+
+.insight-box{
+    background:#1f2937;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,.25);
+    transition:all .3s ease;
+}
+
+.insight-box:hover{
+    transform:translateY(-5px);
+    box-shadow:0 10px 25px rgba(0,0,0,.35);
+}
+
+.insight-box p{
+    margin:10px 0;
+    font-size:16px;
+    color:#e5e7eb;
 }
