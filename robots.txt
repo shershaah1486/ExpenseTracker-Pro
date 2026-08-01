@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://expense-tracker-pro-murex.vercel.app/sitemap.xml
+Sitemap: https://trackwise-psi.vercel.app/sitemap.xml
