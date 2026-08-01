@@ -87,6 +87,19 @@ content="https://trackwise-psi.vercel.app/">
         <button id="clearAll">
     🗑️ Clear All
 </button>
+<button id="exportDataBtn">
+    📤 Export Data
+</button>
+
+<button id="importDataBtn">
+    📥 Import Data
+</button>
+
+<input
+    type="file"
+    id="importFile"
+    accept=".json"
+    style="display:none;">
 
     </div>
 
@@ -182,6 +195,15 @@ content="https://trackwise-psi.vercel.app/">
 
     </div>
     <h2 style="margin-top:25px;">🤖 AI Financial Advisor</h2>
+    <div class="insight-box" id="healthScoreBox">
+
+    <h3>🧠 Financial Health Score</h3>
+
+    <h1 id="healthScore">0/100</h1>
+
+    <p id="healthStatus">Calculating...</p>
+
+</div>
 
 <div id="aiAdvice" class="insight-box">
 

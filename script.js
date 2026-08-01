@@ -27,6 +27,9 @@ const themeBtn = document.getElementById("themeBtn");
 const pdfBtn = document.getElementById("pdfBtn");
 const excelBtn = document.getElementById("excelBtn");
 const clearAllBtn = document.getElementById("clearAll");
+const exportDataBtn = document.getElementById("exportDataBtn");
+const importDataBtn = document.getElementById("importDataBtn");
+const importFile = document.getElementById("importFile");
 // Budget Elements
 const budgetInput = document.getElementById("budgetInput");
 const saveBudget = document.getElementById("saveBudget");
@@ -34,6 +37,8 @@ const remainingBudget = document.getElementById("remainingBudget");
 const budgetProgress = document.getElementById("budgetProgress");
 const monthFilter = document.getElementById("monthFilter");
 const budgetWarning = document.getElementById("budgetWarning");
+const healthScore = document.getElementById("healthScore");
+const healthStatus = document.getElementById("healthStatus");
 
 // Auto Date
 date.value = new Date().toISOString().split("T")[0];
@@ -288,6 +293,11 @@ ${transaction.type === "income" ? "+" : "-"}
     });
 
     const balance = income - expense;
+    updateHealthScore(
+    income,
+    expense,
+    balance
+);
 
     animateValue("balance", balance);
 
@@ -636,6 +646,7 @@ clearAllBtn.addEventListener("click", () => {
     localStorage.removeItem("transactions");
     showToast("🗑️ All Transactions Deleted", "#ef4444");
 
+
     renderTransactions();
 
 });
@@ -740,3 +751,109 @@ document.addEventListener("keydown", (e) => {
 
 // ---------- Initial Load ----------
 renderTransactions();
+// ========== Export Data ==========
+exportDataBtn.addEventListener("click", () => {
+
+    const backup = {
+        transactions: transactions,
+        monthlyBudget: monthlyBudget
+    };
+
+    const blob = new Blob(
+        [JSON.stringify(backup, null, 2)],
+        { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "trackwise-backup.json";
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+    alert("✅ Backup exported successfully!");
+});
+// ========== Import Data ==========
+importDataBtn.addEventListener("click", () => {
+    importFile.click();
+});
+
+importFile.addEventListener("change", (e) => {
+
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+
+        try {
+
+            const backup = JSON.parse(event.target.result);
+
+            transactions = backup.transactions || [];
+            monthlyBudget = backup.monthlyBudget || 0;
+
+            localStorage.setItem(
+                "transactions",
+                JSON.stringify(transactions)
+            );
+
+            localStorage.setItem(
+                "monthlyBudget",
+                monthlyBudget
+            );
+
+            renderTransactions();
+
+            alert("✅ Backup restored successfully!");
+
+        } catch (err) {
+
+            alert("❌ Invalid backup file.");
+
+        }
+
+    };
+
+    reader.readAsText(file);
+
+});
+// ================= AI Health Score =================
+
+function updateHealthScore(totalIncome, totalExpense, currentBalance) {
+
+    let score = 100;
+
+    if (totalIncome > 0) {
+
+        const expenseRatio = (totalExpense / totalIncome) * 100;
+
+        if (expenseRatio > 90) score -= 40;
+        else if (expenseRatio > 75) score -= 25;
+        else if (expenseRatio > 60) score -= 15;
+    }
+
+    if (currentBalance > 0) score += 5;
+
+    if (monthlyBudget > 0 && totalExpense <= monthlyBudget) {
+        score += 5;
+    }
+
+    score = Math.max(0, Math.min(100, score));
+
+    healthScore.textContent = score + "/100";
+
+    if (score >= 90) {
+        healthStatus.textContent = "🟢 Excellent";
+    } else if (score >= 75) {
+        healthStatus.textContent = "🟢 Good";
+    } else if (score >= 50) {
+        healthStatus.textContent = "🟡 Average";
+    } else {
+        healthStatus.textContent = "🔴 Poor";
+    }
+}
