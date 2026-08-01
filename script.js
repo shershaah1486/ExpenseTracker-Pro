@@ -106,12 +106,12 @@ function saveTransaction() {
         amount.value.trim() === "" ||
         date.value === ""
     ) {
-        alert("Please fill all fields.");
+        showToast("⚠️ Please fill all fields.");
         return;
     }
 
     if (Number(amount.value) <= 0) {
-        alert("Amount must be greater than 0.");
+        showToast("⚠️ Amount must be greater than 0.");
         return;
     }
 
@@ -654,7 +654,7 @@ clearAllBtn.addEventListener("click", () => {
 saveBudget.addEventListener("click", () => {
 
     if (budgetInput.value.trim() === "") {
-        alert("Please enter a monthly budget.");
+        showToast("⚠️ Please enter a monthly budget.");
         return;
     }
 
@@ -711,7 +711,7 @@ pdfBtn.addEventListener("click", () => {
 excelBtn.addEventListener("click", () => {
 
     if (transactions.length === 0) {
-        alert("No transactions available to export.");
+        showToast("📄 No transactions available to export.");
         return;
     }
 
@@ -773,7 +773,7 @@ exportDataBtn.addEventListener("click", () => {
 
     URL.revokeObjectURL(url);
 
-    alert("✅ Backup exported successfully!");
+    showToast("✅ Backup exported successfully!");
 });
 // ========== Import Data ==========
 importDataBtn.addEventListener("click", () => {
@@ -809,11 +809,11 @@ importFile.addEventListener("change", (e) => {
 
             renderTransactions();
 
-            alert("✅ Backup restored successfully!");
+            showToast("✅ Backup restored successfully!");
 
         } catch (err) {
 
-            alert("❌ Invalid backup file.");
+            showToast("❌ Invalid backup file.");
 
         }
 
@@ -856,4 +856,77 @@ function updateHealthScore(totalIncome, totalExpense, currentBalance) {
     } else {
         healthStatus.textContent = "🔴 Poor";
     }
+}
+// ================= Toast =================
+
+function showToast(message) {
+
+    const toast = document.getElementById("toast");
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+
+        toast.classList.remove("show");
+
+    }, 2500);
+
+}
+// ================= Typing Animation =================
+
+const typingText = document.getElementById("typingText");
+
+if (typingText) {
+
+    const words = [
+        "Track Smart.",
+        "Save More.",
+        "Spend Wisely.",
+        "Take Control."
+    ];
+
+    let index = 0;
+
+    setInterval(() => {
+
+        index = (index + 1) % words.length;
+
+        typingText.style.opacity = 0;
+
+        setTimeout(() => {
+
+            typingText.textContent = words[index];
+
+            typingText.style.opacity = 1;
+
+        }, 250);
+
+    }, 2500);
+
+}
+// Hero Buttons
+
+const startBtn = document.getElementById("startBtn");
+const learnBtn = document.getElementById("learnBtn");
+
+if (startBtn) {
+    startBtn.addEventListener("click", () => {
+        document.getElementById("dashboard").scrollIntoView({
+            behavior: "smooth"
+        });
+    });
+}
+
+if (learnBtn) {
+
+    learnBtn.addEventListener("click", () => {
+
+        document.getElementById("insights").scrollIntoView({
+            behavior: "smooth"
+        });
+
+    });
+
 }
