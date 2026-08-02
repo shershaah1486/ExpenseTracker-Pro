@@ -20,6 +20,8 @@ const amount = document.getElementById("amount");
 const type = document.getElementById("type");
 const category = document.getElementById("category");
 const date = document.getElementById("date");
+const repeatType = document.getElementById("repeatType");
+const isRecurring = document.getElementById("isRecurring");
 
 const addBtn = document.getElementById("addBtn");
 const search = document.getElementById("search");
@@ -32,6 +34,17 @@ const importDataBtn = document.getElementById("importDataBtn");
 const importFile = document.getElementById("importFile");
 // Budget Elements
 const budgetInput = document.getElementById("budgetInput");
+// ===== Savings Goal =====
+
+const goalInput = document.getElementById("goalInput");
+const saveGoal = document.getElementById("saveGoal");
+const goalAmount = document.getElementById("goalAmount");
+const goalRemaining = document.getElementById("goalRemaining");
+const goalProgress = document.getElementById("goalProgress");
+const goalPercent = document.getElementById("goalPercent");
+
+let savingsGoal =
+    Number(localStorage.getItem("savingsGoal")) || 0;
 const saveBudget = document.getElementById("saveBudget");
 const remainingBudget = document.getElementById("remainingBudget");
 const budgetProgress = document.getElementById("budgetProgress");
@@ -125,7 +138,10 @@ function saveTransaction() {
 
         category: category.value,
 
-        date: date.value
+        date: date.value,
+        repeat: repeatType.value,
+recurring: isRecurring.checked,
+lastRun: date.value
 
     };
 
@@ -162,6 +178,99 @@ function clearForm() {
     type.value = "income";
     category.value = "Food";
     date.value = new Date().toISOString().split("T")[0];
+    repeatType.value = "none";
+isRecurring.checked = false;
+
+}
+// ---------- Recurring Transactions ----------
+
+function processRecurringTransactions() {
+
+    const today = new Date();
+    const newTransactions = [];
+
+    transactions.forEach((transaction) => {
+
+        if (!transaction.recurring || transaction.repeat === "none") {
+            return;
+        }
+
+        if (!transaction.lastRun) {
+            transaction.lastRun = transaction.date;
+        }
+
+        let lastRun = new Date(transaction.lastRun);
+
+        while (true) {
+
+            let nextRun = new Date(lastRun);
+
+            switch (transaction.repeat) {
+
+                case "daily":
+                    nextRun.setDate(nextRun.getDate() + 1);
+                    break;
+
+                case "weekly":
+                    nextRun.setDate(nextRun.getDate() + 7);
+                    break;
+
+                case "monthly":
+                    nextRun.setMonth(nextRun.getMonth() + 1);
+                    break;
+
+                case "yearly":
+                    nextRun.setFullYear(nextRun.getFullYear() + 1);
+                    break;
+
+                default:
+                    return;
+            }
+
+            if (nextRun > today) break;
+            const alreadyExists = transactions.some(t =>
+    t.description === transaction.description &&
+    t.amount === transaction.amount &&
+    t.type === transaction.type &&
+    t.category === transaction.category &&
+    t.date === nextRun.toISOString().split("T")[0]
+);
+
+if (alreadyExists) {
+    lastRun = nextRun;
+    transaction.lastRun =
+        nextRun.toISOString().split("T")[0];
+    continue;
+}
+
+            newTransactions.push({
+
+                ...transaction,
+
+                date: nextRun.toISOString().split("T")[0],
+
+                lastRun: nextRun.toISOString().split("T")[0]
+
+            });
+
+            lastRun = nextRun;
+
+            transaction.lastRun =
+                nextRun.toISOString().split("T")[0];
+        }
+
+    });
+
+    if (newTransactions.length > 0) {
+
+        transactions.push(...newTransactions);
+
+        localStorage.setItem(
+            "transactions",
+            JSON.stringify(transactions)
+        );
+
+    }
 
 }
 // ---------- Render Transactions ----------
@@ -293,13 +402,49 @@ ${transaction.type === "income" ? "+" : "-"}
     });
 
     const balance = income - expense;
-    updateHealthScore(
+
+updateHealthScore(
     income,
     expense,
     balance
 );
 
-    animateValue("balance", balance);
+// ===== Savings Goal Update =====
+
+goalInput.value = savingsGoal || "";
+
+goalAmount.textContent =
+    "₹" + savingsGoal.toLocaleString("en-IN", {
+        minimumFractionDigits: 2
+    });
+
+const remainingGoal = Math.max(
+    0,
+    savingsGoal - balance
+);
+
+goalRemaining.textContent =
+    "₹" + remainingGoal.toLocaleString("en-IN", {
+        minimumFractionDigits: 2
+    });
+
+let goalPercentage = 0;
+
+if (savingsGoal > 0) {
+    goalPercentage = Math.min(
+        100,
+        (balance / savingsGoal) * 100
+    );
+}
+
+goalProgress.style.width = goalPercentage + "%";
+goalPercent.textContent = goalPercentage.toFixed(1) + "%";
+
+if (goalPercentage >= 100) {
+    showToast("🎉 Congratulations! Savings Goal Achieved!");
+}
+
+animateValue("balance", balance);
 
     
     
@@ -340,8 +485,15 @@ document.getElementById("topCategory").textContent = topCategory;
 // ===== Saving Rate =====
 let savingRate = 0;
 
+// Saving rate should never be negative
 if (monthIncome > 0) {
-    savingRate = ((monthIncome - monthExpense) / monthIncome) * 100;
+
+    if (monthExpense < monthIncome) {
+        savingRate = ((monthIncome - monthExpense) / monthIncome) * 100;
+    } else {
+        savingRate = 0;
+    }
+
 }
 
 document.getElementById("savingRate").textContent =
@@ -374,11 +526,13 @@ const currentMonthExpense = monthExpense;
 
 const remaining = monthlyBudget - currentMonthExpense;
 
+// Never show negative remaining budget
+const displayRemaining = Math.max(0, remaining);
+
 remainingBudget.textContent =
-    "₹" + remaining.toLocaleString("en-IN", {
+    "₹" + displayRemaining.toLocaleString("en-IN", {
         minimumFractionDigits: 2
     });
-
 let percent = 0;
 
 if (monthlyBudget > 0) {
@@ -671,6 +825,22 @@ saveBudget.addEventListener("click", () => {
     renderTransactions();
 
 });
+// ===== Save Savings Goal =====
+
+saveGoal.addEventListener("click", () => {
+
+    savingsGoal = Number(goalInput.value);
+
+    localStorage.setItem(
+        "savingsGoal",
+        savingsGoal
+    );
+
+    renderTransactions();
+
+    showToast("🎯 Savings Goal Saved!");
+
+});
 // ---------- PDF Export ----------
 pdfBtn.addEventListener("click", () => {
 
@@ -678,10 +848,19 @@ pdfBtn.addEventListener("click", () => {
 
     const doc = new jsPDF();
 
-    doc.setFontSize(20);
-    doc.text("Expense Tracker Report", 20, 20);
+    doc.setFont("helvetica", "bold");
+doc.setFontSize(22);
+doc.text("TRACKWISE - FINANCIAL REPORT", 20, 20);
 
-    doc.setFontSize(12);
+doc.setFont("helvetica", "normal");
+doc.setFontSize(11);
+doc.text("Generated on: " + new Date().toLocaleDateString(), 20, 30);
+
+doc.setDrawColor(34, 197, 94);
+doc.setLineWidth(0.8);
+doc.line(20, 35, 190, 35);
+
+doc.setFontSize(13);
 
     doc.text(
         "Current Balance: " +
@@ -703,6 +882,104 @@ pdfBtn.addEventListener("click", () => {
         20,
         60
     );
+    // ---------------- Financial Health ----------------
+
+doc.setFont("helvetica", "bold");
+doc.setFontSize(15);
+doc.text("Financial Health", 20, 80);
+
+doc.setFont("helvetica", "normal");
+doc.setFontSize(12);
+
+doc.text(
+    "Health Score: " + document.getElementById("healthScore").textContent,
+    20,
+    90
+);
+
+const healthStatusText = document
+    .getElementById("healthStatus")
+    .textContent
+    .replace(/[^\x00-\x7F]/g, "");
+
+doc.text(
+    "Status: " + healthStatusText.trim(),
+    20,
+    100
+);
+// ---------------- AI Insights ----------------
+
+doc.setFont("helvetica", "bold");
+doc.setFontSize(15);
+doc.text("AI Financial Insights", 20, 120);
+
+doc.setFont("helvetica", "normal");
+doc.setFontSize(11);
+
+const aiText = document
+    .getElementById("financialInsights")
+    .innerText
+    .replace(/[^\x00-\x7F]/g, "")
+    .replace(/\n/g, " ");
+
+doc.text(aiText, 20, 130, {
+    maxWidth: 170
+});
+// ---------------- Charts ----------------
+
+// Expense Pie Chart
+const expenseChartCanvas = document.getElementById("expenseChart");
+
+if (expenseChartCanvas) {
+    const expenseChartImg = expenseChartCanvas.toDataURL("image/png", 1.0);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(15);
+    doc.text("Expense Breakdown", 20, 155);
+
+    doc.addImage(
+    expenseChartImg,
+    "PNG",
+    15,
+    160,
+    85,
+    85
+);
+}
+
+// Income vs Expense Chart
+const incomeChartCanvas = document.getElementById("incomeExpenseChart");
+
+if (incomeChartCanvas) {
+    const incomeChartImg = incomeChartCanvas.toDataURL("image/png", 1.0);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(15);
+    doc.text("Income vs Expense", 110, 155);
+
+    doc.addImage(
+    incomeChartImg,
+    "PNG",
+    105,
+    160,
+    85,
+    85
+);
+}
+doc.setDrawColor(180);
+doc.line(20, 285, 190, 285);
+
+doc.setFontSize(10);
+doc.setTextColor(120);
+
+doc.text(
+    "Generated by TrackWise | Developed by Devesh Gouniyal",
+    20,
+    292
+);
+
+// Reset color (optional, good practice)
+doc.setTextColor(0);
 
     doc.save("Expense_Report.pdf");
 
@@ -750,6 +1027,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ---------- Initial Load ----------
+processRecurringTransactions();
 renderTransactions();
 // ========== Export Data ==========
 exportDataBtn.addEventListener("click", () => {
