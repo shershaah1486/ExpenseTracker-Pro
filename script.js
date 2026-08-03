@@ -13,6 +13,7 @@ let transactions =
 let editIndex = -1;
 let expenseChart = null;
 let incomeExpenseChart = null;
+let monthlyTrendChart = null;
 
 // ---------- Elements ----------
 const description = document.getElementById("description");
@@ -402,6 +403,10 @@ ${transaction.type === "income" ? "+" : "-"}
     });
 
     const balance = income - expense;
+    // ===== Analytics Dashboard =====
+
+
+
 
 updateHealthScore(
     income,
@@ -482,6 +487,41 @@ for (const cat in categoryTotals) {
 }
 
 document.getElementById("topCategory").textContent = topCategory;
+// ===== Analytics Dashboard =====
+
+const incomeTransactions =
+    transactions.filter(t => t.type === "income").length;
+
+const expenseTransactions =
+    transactions.filter(t => t.type === "expense").length;
+
+const avgIncome =
+    incomeTransactions > 0
+        ? income / incomeTransactions
+        : 0;
+
+const avgExpense =
+    expenseTransactions > 0
+        ? expense / expenseTransactions
+        : 0;
+
+document.getElementById("avgIncome").textContent =
+    "₹" + avgIncome.toLocaleString("en-IN", {
+        maximumFractionDigits: 0
+    });
+
+document.getElementById("avgExpense").textContent =
+    "₹" + avgExpense.toLocaleString("en-IN", {
+        maximumFractionDigits: 0
+    });
+
+document.getElementById("topAnalyticsCategory").textContent =
+    topCategory;
+
+document.getElementById("analyticsSavings").textContent =
+    "₹" + balance.toLocaleString("en-IN", {
+        maximumFractionDigits: 0
+    });
 // ===== Saving Rate =====
 let savingRate = 0;
 
@@ -559,6 +599,7 @@ if (monthlyBudget > 0) {
         budgetWarning.textContent = "";
 
     }
+    renderMonthlyTrendChart();
 
 }
 // ===== Budget Insights =====
@@ -1100,6 +1141,126 @@ importFile.addEventListener("change", (e) => {
     reader.readAsText(file);
 
 });
+function renderMonthlyTrendChart() {
+
+    const labels = [];
+    const incomeData = [];
+    const expenseData = [];
+
+    const monthNames = [
+        "Jan","Feb","Mar","Apr","May","Jun",
+        "Jul","Aug","Sep","Oct","Nov","Dec"
+    ];
+
+    for (let i = 5; i >= 0; i--) {
+
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+
+        const month = d.getMonth();
+        const year = d.getFullYear();
+
+        labels.push(monthNames[month]);
+
+        let income = 0;
+        let expense = 0;
+
+        transactions.forEach(t => {
+
+            const td = new Date(t.date);
+
+            if (
+                td.getMonth() === month &&
+                td.getFullYear() === year
+            ) {
+
+                if (t.type === "income")
+                    income += t.amount;
+                else
+                    expense += t.amount;
+
+            }
+
+        });
+
+        incomeData.push(income);
+        expenseData.push(expense);
+
+    }
+
+    if (monthlyTrendChart)
+        monthlyTrendChart.destroy();
+
+    monthlyTrendChart = new Chart(
+
+        document.getElementById("monthlyTrendChart"),
+
+        {
+            type: "line",
+
+            data: {
+
+                labels,
+
+                datasets: [
+
+                    {
+                        label: "Income",
+                        data: incomeData,
+                        borderColor: "#22c55e",
+                        backgroundColor: "rgba(34,197,94,.15)",
+                        fill: true,
+                        tension: .4
+                    },
+
+                    {
+                        label: "Expense",
+                        data: expenseData,
+                        borderColor: "#ef4444",
+                        backgroundColor: "rgba(239,68,68,.15)",
+                        fill: true,
+                        tension: .4
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: "#fff"
+                        }
+                    }
+                },
+
+                scales: {
+
+                    x: {
+                        ticks: {
+                            color: "#fff"
+                        }
+                    },
+
+                    y: {
+                        ticks: {
+                            color: "#fff"
+                        }
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+}
 // ================= AI Health Score =================
 
 function updateHealthScore(totalIncome, totalExpense, currentBalance) {
@@ -1135,23 +1296,7 @@ function updateHealthScore(totalIncome, totalExpense, currentBalance) {
         healthStatus.textContent = "🔴 Poor";
     }
 }
-// ================= Toast =================
 
-function showToast(message) {
-
-    const toast = document.getElementById("toast");
-
-    toast.textContent = message;
-
-    toast.classList.add("show");
-
-    setTimeout(() => {
-
-        toast.classList.remove("show");
-
-    }, 2500);
-
-}
 // ================= Typing Animation =================
 
 const typingText = document.getElementById("typingText");

@@ -120,6 +120,44 @@ border-radius:12px;
 box-shadow:0 5px 15px rgba(0,0,0,.3);
 }
 
+/* ---------- Analytics Dashboard ---------- */
+
+.analytics-dashboard{
+    margin-top:30px;
+}
+
+.analytics-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+    margin-top:15px;
+}
+
+.analytics-card{
+    background:#1f2937;
+    border-radius:12px;
+    padding:18px;
+    text-align:center;
+    transition:.3s;
+    border:1px solid rgba(255,255,255,.05);
+}
+
+.analytics-card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 8px 20px rgba(0,0,0,.3);
+}
+
+.analytics-card h3{
+    font-size:16px;
+    margin-bottom:10px;
+    color:#cbd5e1;
+}
+
+.analytics-card p{
+    font-size:24px;
+    font-weight:bold;
+    color:#22c55e;
+}
 .left-panel{
 display:flex;
 flex-direction:column;
