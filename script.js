@@ -401,6 +401,114 @@ ${transaction.type === "income" ? "+" : "-"}
 `;
 
     });
+    const recentContainer = document.getElementById("recentTransactions");
+
+const recent = [...transactions]
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5);
+
+if (recent.length === 0) {
+
+    recentContainer.innerHTML =
+        "<p>No recent transactions.</p>";
+
+} else {
+
+    recentContainer.innerHTML = recent.map(t => `
+
+        <div class="recent-item">
+
+            <span>${t.description}</span>
+
+            <span class="${
+                t.type === "income"
+                    ? "recent-income"
+                    : "recent-expense"
+            }">
+
+                ${t.type === "income" ? "+" : "-"}₹${t.amount.toLocaleString("en-IN")}
+
+            </span>
+
+        </div>
+
+    `).join("");
+
+}
+// ===== Upcoming Recurring Payments =====
+
+const upcomingContainer =
+    document.getElementById("upcomingPayments");
+
+const recurringList = transactions
+    .filter(t => t.recurring)
+    .slice(0, 5);
+
+if (recurringList.length === 0) {
+
+    upcomingContainer.innerHTML =
+        "<p>No upcoming recurring payments.</p>";
+
+} else {
+
+    upcomingContainer.innerHTML = recurringList.map(t => {
+
+        const last = new Date(t.lastRun || t.date);
+        const next = new Date(last);
+
+        switch (t.repeat) {
+
+            case "daily":
+                next.setDate(next.getDate() + 1);
+                break;
+
+            case "weekly":
+                next.setDate(next.getDate() + 7);
+                break;
+
+            case "monthly":
+                next.setMonth(next.getMonth() + 1);
+                break;
+
+            case "yearly":
+                next.setFullYear(next.getFullYear() + 1);
+                break;
+        }
+
+        const diff =
+            Math.ceil(
+                (next - new Date()) /
+                (1000 * 60 * 60 * 24)
+            );
+
+        let text = "";
+
+        if (diff <= 0)
+            text = "Today";
+        else if (diff === 1)
+            text = "Tomorrow";
+        else
+            text = diff + " days";
+
+        return `
+
+            <div class="upcoming-item">
+
+                <span>${t.description}</span>
+
+                <span class="upcoming-days">
+
+                    ${text}
+
+                </span>
+
+            </div>
+
+        `;
+
+    }).join("");
+
+}
 
     const balance = income - expense;
     // ===== Analytics Dashboard =====
