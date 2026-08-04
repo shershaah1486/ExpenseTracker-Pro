@@ -35,17 +35,9 @@ const importDataBtn = document.getElementById("importDataBtn");
 const importFile = document.getElementById("importFile");
 // Budget Elements
 const budgetInput = document.getElementById("budgetInput");
-// ===== Savings Goal =====
 
-const goalInput = document.getElementById("goalInput");
-const saveGoal = document.getElementById("saveGoal");
-const goalAmount = document.getElementById("goalAmount");
-const goalRemaining = document.getElementById("goalRemaining");
-const goalProgress = document.getElementById("goalProgress");
-const goalPercent = document.getElementById("goalPercent");
 
-let savingsGoal =
-    Number(localStorage.getItem("savingsGoal")) || 0;
+
 const saveBudget = document.getElementById("saveBudget");
 const remainingBudget = document.getElementById("remainingBudget");
 const budgetProgress = document.getElementById("budgetProgress");
@@ -522,40 +514,7 @@ updateHealthScore(
     balance
 );
 
-// ===== Savings Goal Update =====
 
-goalInput.value = savingsGoal || "";
-
-goalAmount.textContent =
-    "₹" + savingsGoal.toLocaleString("en-IN", {
-        minimumFractionDigits: 2
-    });
-
-const remainingGoal = Math.max(
-    0,
-    savingsGoal - balance
-);
-
-goalRemaining.textContent =
-    "₹" + remainingGoal.toLocaleString("en-IN", {
-        minimumFractionDigits: 2
-    });
-
-let goalPercentage = 0;
-
-if (savingsGoal > 0) {
-    goalPercentage = Math.min(
-        100,
-        (balance / savingsGoal) * 100
-    );
-}
-
-goalProgress.style.width = goalPercentage + "%";
-goalPercent.textContent = goalPercentage.toFixed(1) + "%";
-
-if (goalPercentage >= 100) {
-    showToast("🎉 Congratulations! Savings Goal Achieved!");
-}
 
 animateValue("balance", balance);
 
@@ -974,22 +933,7 @@ saveBudget.addEventListener("click", () => {
     renderTransactions();
 
 });
-// ===== Save Savings Goal =====
 
-saveGoal.addEventListener("click", () => {
-
-    savingsGoal = Number(goalInput.value);
-
-    localStorage.setItem(
-        "savingsGoal",
-        savingsGoal
-    );
-
-    renderTransactions();
-
-    showToast("🎯 Savings Goal Saved!");
-
-});
 // ---------- PDF Export ----------
 pdfBtn.addEventListener("click", () => {
 
@@ -1177,6 +1121,7 @@ document.addEventListener("keydown", (e) => {
 
 // ---------- Initial Load ----------
 processRecurringTransactions();
+localStorage.removeItem("savingsGoal");
 renderTransactions();
 // ========== Export Data ==========
 exportDataBtn.addEventListener("click", () => {
