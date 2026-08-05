@@ -404,6 +404,19 @@ header{
 }
 
 @media (max-width:768px){
+    .hero-logo{
+    width:120px !important;
+    height:120px !important;
+}
+
+.hero-brand{
+    flex-direction:column;
+    gap:10px;
+}
+
+.hero-brand h1{
+    font-size:36px !important;
+}
 
 main{
     padding:15px;
@@ -1031,8 +1044,8 @@ overflow: hidden;
 }
 
 .hero-logo{
-    width:300px;
-    height:300px;
+    width:220px;
+    height:220px;
     object-fit:contain;
     filter:drop-shadow(0 0 20px rgba(0,255,180,.35));
 }

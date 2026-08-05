@@ -503,6 +503,20 @@ if (recurringList.length === 0) {
 }
 
     const balance = income - expense;
+    document.getElementById("balance").textContent =
+    "₹" + balance.toLocaleString("en-IN", {
+        minimumFractionDigits: 2
+    });
+
+document.getElementById("income").textContent =
+    "₹" + income.toLocaleString("en-IN", {
+        minimumFractionDigits: 2
+    });
+
+document.getElementById("expense").textContent =
+    "₹" + expense.toLocaleString("en-IN", {
+        minimumFractionDigits: 2
+    });
     // ===== Analytics Dashboard =====
 
 
@@ -516,13 +530,7 @@ updateHealthScore(
 
 
 
-animateValue("balance", balance);
 
-    
-    
-    animateValue("income", income);
-
-    animateValue("expense", expense);
 
     document.getElementById("transactionCount").textContent =
         transactions.length;
