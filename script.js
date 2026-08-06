@@ -33,7 +33,7 @@ const pdfBtn = document.getElementById("pdfBtn");
 let selectedCurrency =
     localStorage.getItem("currency") || "INR";
 
-const currencyRates = {
+let currencyRates = {
 
 INR:1,
 
@@ -100,6 +100,38 @@ function formatCurrency(amount) {
             maximumFractionDigits: 2
         })
     );
+
+}
+async function fetchLiveRates() {
+
+    try {
+
+        const response = await fetch(
+            "https://open.er-api.com/v6/latest/INR"
+        );
+
+        const data = await response.json();
+
+        if (data.result !== "success") {
+            throw new Error("API Error");
+        }
+
+        currencyRates = {
+            INR: 1,
+            ...data.rates
+        };
+        console.log(data);
+console.log(currencyRates);
+
+        console.log("✅ Live exchange rates loaded");
+
+        renderTransactions();
+
+    } catch (error) {
+
+        console.log("⚠️ Live rates unavailable. Using offline rates.");
+
+    }
 
 }
 const excelBtn = document.getElementById("excelBtn");
@@ -1489,3 +1521,5 @@ if (learnBtn) {
     });
 
 }
+// ===== Load Live Exchange Rates =====
+fetchLiveRates();
