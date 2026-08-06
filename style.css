@@ -1059,3 +1059,25 @@ overflow: hidden;
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 }
+.currency-box label{
+    color:#fff;
+    font-size:18px;
+    font-weight:600;
+    margin-bottom:10px;
+}
+
+.currency-box select{
+    background:#1f2937;
+    color:#fff;
+    border:2px solid #00d4ff;
+    border-radius:12px;
+    padding:12px 18px;
+    font-size:16px;
+    cursor:pointer;
+    transition:.3s;
+    min-width:220px;
+}
+
+.currency-box select:hover{
+    border-color:#00ff99;
+}

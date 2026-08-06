@@ -28,6 +28,46 @@ const addBtn = document.getElementById("addBtn");
 const search = document.getElementById("search");
 const themeBtn = document.getElementById("themeBtn");
 const pdfBtn = document.getElementById("pdfBtn");
+// ===== Currency System =====
+
+let selectedCurrency =
+    localStorage.getItem("currency") || "INR";
+
+const currencyRates = {
+    INR: 1,
+    USD: 0.0116,
+    EUR: 0.0100,
+    GBP: 0.0086,
+    AED: 0.0427,
+    RUB: 0.91,
+    SEK: 0.11,
+    JPY: 1.70
+};
+
+const currencySymbols = {
+    INR: "₹",
+    USD: "$",
+    EUR: "€",
+    GBP: "£",
+    AED: "د.إ",
+    RUB: "₽",
+    SEK: "kr",
+    JPY: "¥"
+};
+function formatCurrency(amount) {
+
+    const converted =
+        amount * currencyRates[selectedCurrency];
+
+    return (
+        currencySymbols[selectedCurrency] +
+        converted.toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })
+    );
+
+}
 const excelBtn = document.getElementById("excelBtn");
 const clearAllBtn = document.getElementById("clearAll");
 const exportDataBtn = document.getElementById("exportDataBtn");
@@ -373,7 +413,7 @@ ${transaction.type === "income"
 };font-weight:bold;">
 
 ${transaction.type === "income" ? "+" : "-"}
-₹${transaction.amount.toLocaleString("en-IN")}
+${formatCurrency(transaction.amount)}
 
 </td>
 
@@ -418,7 +458,7 @@ if (recent.length === 0) {
                     : "recent-expense"
             }">
 
-                ${t.type === "income" ? "+" : "-"}₹${t.amount.toLocaleString("en-IN")}
+                ${t.type === "income" ? "+" : "-"}${formatCurrency(t.amount)}
 
             </span>
 
@@ -504,19 +544,14 @@ if (recurringList.length === 0) {
 
     const balance = income - expense;
     document.getElementById("balance").textContent =
-    "₹" + balance.toLocaleString("en-IN", {
-        minimumFractionDigits: 2
-    });
+    formatCurrency(balance);
 
 document.getElementById("income").textContent =
-    "₹" + income.toLocaleString("en-IN", {
-        minimumFractionDigits: 2
-    });
+    formatCurrency(income);
 
 document.getElementById("expense").textContent =
-    "₹" + expense.toLocaleString("en-IN", {
-        minimumFractionDigits: 2
-    });
+    formatCurrency(expense);
+    
     // ===== Analytics Dashboard =====
 
 
@@ -537,19 +572,13 @@ updateHealthScore(
         // ===== Monthly Summary =====
 
 document.getElementById("monthIncome").textContent =
-    "₹" + monthIncome.toLocaleString("en-IN", {
-        minimumFractionDigits: 2
-    });
+    formatCurrency(monthIncome);
 
 document.getElementById("monthExpense").textContent =
-    "₹" + monthExpense.toLocaleString("en-IN", {
-        minimumFractionDigits: 2
-    });
+    formatCurrency(monthExpense);
 
 document.getElementById("monthSavings").textContent =
-    "₹" + (monthIncome - monthExpense).toLocaleString("en-IN", {
-        minimumFractionDigits: 2
-    });
+    formatCurrency(monthIncome - monthExpense);
 
 let topCategory = "-";
 let maxExpense = 0;
@@ -580,23 +609,19 @@ const avgExpense =
         ? expense / expenseTransactions
         : 0;
 
-document.getElementById("avgIncome").textContent =
-    "₹" + avgIncome.toLocaleString("en-IN", {
+
         maximumFractionDigits: 0
-    });
+    document.getElementById("avgIncome").textContent =
+    formatCurrency(avgIncome);
 
 document.getElementById("avgExpense").textContent =
-    "₹" + avgExpense.toLocaleString("en-IN", {
-        maximumFractionDigits: 0
-    });
+    formatCurrency(avgExpense);
 
 document.getElementById("topAnalyticsCategory").textContent =
     topCategory;
 
 document.getElementById("analyticsSavings").textContent =
-    "₹" + balance.toLocaleString("en-IN", {
-        maximumFractionDigits: 0
-    });
+    formatCurrency(balance);
 // ===== Saving Rate =====
 let savingRate = 0;
 
@@ -645,9 +670,8 @@ const remaining = monthlyBudget - currentMonthExpense;
 const displayRemaining = Math.max(0, remaining);
 
 remainingBudget.textContent =
-    "₹" + displayRemaining.toLocaleString("en-IN", {
-        minimumFractionDigits: 2
-    });
+"Remaining: " +
+formatCurrency(remaining);
 let percent = 0;
 
 if (monthlyBudget > 0) {
@@ -896,6 +920,23 @@ function editTransaction(index) {
 // ---------- Search ----------
 search.addEventListener("input", renderTransactions);
 monthFilter.addEventListener("change", renderTransactions);
+const currencySelect =
+    document.getElementById("currencySelect");
+
+currencySelect.value = selectedCurrency;
+
+currencySelect.addEventListener("change", () => {
+
+    selectedCurrency = currencySelect.value;
+
+    localStorage.setItem(
+        "currency",
+        selectedCurrency
+    );
+
+    renderTransactions();
+
+});
 
 // ---------- Dark Mode ----------
 themeBtn.addEventListener("click", () => {
