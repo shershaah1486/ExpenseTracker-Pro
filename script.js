@@ -34,25 +34,59 @@ let selectedCurrency =
     localStorage.getItem("currency") || "INR";
 
 const currencyRates = {
-    INR: 1,
-    USD: 0.0116,
-    EUR: 0.0100,
-    GBP: 0.0086,
-    AED: 0.0427,
-    RUB: 0.91,
-    SEK: 0.11,
-    JPY: 1.70
+
+INR:1,
+
+USD:0.0116,
+EUR:0.0100,
+GBP:0.0086,
+JPY:1.70,
+AED:0.0427,
+
+CAD:0.0158,
+AUD:0.0178,
+CHF:0.0094,
+SGD:0.0150,
+CNY:0.083,
+
+SAR:0.0435,
+MYR:0.054,
+THB:0.38,
+KRW:16.2,
+RUB:0.91,
+
+SEK:0.11,
+NZD:0.019,
+ZAR:0.21
+
 };
 
 const currencySymbols = {
-    INR: "₹",
-    USD: "$",
-    EUR: "€",
-    GBP: "£",
-    AED: "د.إ",
-    RUB: "₽",
-    SEK: "kr",
-    JPY: "¥"
+
+INR:"₹",
+
+USD:"$",
+EUR:"€",
+GBP:"£",
+JPY:"¥",
+AED:"د.إ",
+
+CAD:"C$",
+AUD:"A$",
+CHF:"Fr",
+SGD:"S$",
+CNY:"¥",
+
+SAR:"﷼",
+MYR:"RM",
+THB:"฿",
+KRW:"₩",
+RUB:"₽",
+
+SEK:"kr",
+NZD:"NZ$",
+ZAR:"R"
+
 };
 function formatCurrency(amount) {
 
