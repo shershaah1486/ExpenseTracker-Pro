@@ -4,6 +4,7 @@
 // =============================
 
 // ---------- Local Storage ----------
+
 let transactions =
     JSON.parse(localStorage.getItem("transactions")) || [];
     let monthlyBudget =
@@ -102,6 +103,11 @@ function formatCurrency(amount) {
     );
 
 }
+
+
+    
+
+
 async function fetchLiveRates() {
 
     try {
@@ -119,7 +125,9 @@ async function fetchLiveRates() {
         currencyRates = {
             INR: 1,
             ...data.rates
-        };
+        
+        
+}
         console.log(data);
 console.log(currencyRates);
 
@@ -134,11 +142,47 @@ console.log(currencyRates);
     }
 
 }
+async function analyzeReceiptWithAI(receiptText) {
+
+    try {
+
+        const response = await fetch("http://localhost:5000/analyze-receipt", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                receiptText
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        console.log("✅ AI Result:", data);
+
+        return data;
+
+    } catch (err) {
+
+        console.error("❌ AI Error:", err);
+
+        return null;
+
+    }
+
+}
 const excelBtn = document.getElementById("excelBtn");
 const clearAllBtn = document.getElementById("clearAll");
 const exportDataBtn = document.getElementById("exportDataBtn");
 const importDataBtn = document.getElementById("importDataBtn");
 const importFile = document.getElementById("importFile");
+const receiptInput = document.getElementById("receiptInput");
+const receiptPreview = document.getElementById("receiptPreview");
+const scanReceiptBtn = document.getElementById("scanReceiptBtn");
 // Budget Elements
 const budgetInput = document.getElementById("budgetInput");
 
@@ -1523,3 +1567,234 @@ if (learnBtn) {
 }
 // ===== Load Live Exchange Rates =====
 fetchLiveRates();
+// ================= AI Receipt Scanner =================
+
+receiptInput.addEventListener("change", (e) => {
+
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(event){
+
+        receiptPreview.src = event.target.result;
+
+        receiptPreview.style.display = "block";
+
+    };
+
+    reader.readAsDataURL(file);
+
+});
+scanReceiptBtn.addEventListener("click", async () => {
+
+    if (!receiptInput.files.length) {
+        alert("Please select a receipt image first.");
+        return;
+    }
+
+    scanReceiptBtn.textContent = "⏳ Scanning...";
+
+    const {
+        data: { text }
+    } = await Tesseract.recognize(
+        receiptInput.files[0],
+        "eng"
+    );
+
+    console.log(text);
+    // ===== Gemini AI Analysis =====
+
+const aiResult = await analyzeReceiptWithAI(text);
+
+console.log("AI Result FULL:", JSON.stringify(aiResult, null, 2));
+
+if (aiResult) {
+
+    if (aiResult.merchant)
+        description.value = aiResult.merchant;
+
+    if (aiResult.amount)
+        amount.value = aiResult.amount;
+
+    if (aiResult.date)
+        date.value = aiResult.date;
+
+    if (aiResult.category)
+        category.value = aiResult.category;
+
+    if (aiResult.type)
+        type.value = aiResult.type;
+    type.dispatchEvent(new Event("change"));
+category.dispatchEvent(new Event("change"));
+
+}
+
+    const totalMatch = text.match(/TOTAL\s*([0-9]+[.,][0-9]{2})/i);
+
+if (totalMatch) {
+    amount.value = totalMatch[1].replace(",", ".");
+}
+const lines = text.split("\n").filter(line => line.trim() !== "");
+const ignoreWords = [
+    "cash",
+    "change",
+    "total",
+    "subtotal",
+    "tax",
+    "gst",
+    "vat",
+    "receipt",
+    "invoice",
+    "qty",
+    "price",
+    "amount",
+    "balance"
+];
+
+let merchant = "";
+
+for (const line of lines) {
+
+    const clean = line.trim();
+
+    if (clean.length < 4) continue;
+
+    const lower = clean.toLowerCase();
+
+    if (
+        ignoreWords.some(word => lower.includes(word))
+    ) {
+        continue;
+    }
+
+    // Numbers wali lines skip
+    if (/^\d/.test(clean)) continue;
+
+    merchant = clean;
+    break;
+}
+
+
+// ===== Detect Purchased Items =====
+
+const purchasedItems = [];
+
+for (const line of lines) {
+
+    const lower = line.toLowerCase();
+
+    // Ignore unwanted lines
+    if (
+        lower.includes("total") ||
+        lower.includes("subtotal") ||
+        lower.includes("cash") ||
+        lower.includes("change") ||
+        lower.includes("tax") ||
+        lower.includes("gst") ||
+        lower.includes("vat")
+    ) {
+        continue;
+    }
+
+    // Match item lines like:
+    // 2 APPLE 1.00
+    // 1 MILK 25.50
+    if (/^\d+\s+[A-Za-z]/.test(line.trim())) {
+
+        purchasedItems.push(line.trim());
+
+    }
+
+}
+
+console.log("Purchased Items:", purchasedItems);
+
+
+if (lines.length) {
+    const merchantKeywords = [
+    "supermarket",
+    "amazon",
+    "flipkart",
+    "dmart",
+    "zomato",
+    "swiggy",
+    "domino",
+    "reliance",
+    "big bazaar"
+];
+
+let merchant = "";
+
+for (const line of lines) {
+    const lower = line.toLowerCase();
+
+    if (merchantKeywords.some(word => lower.includes(word))) {
+        merchant = line;
+        break;
+    }
+}
+
+
+type.value = "expense";
+}
+const dateMatch = text.match(/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/);
+
+if (dateMatch) {
+
+    const parts = dateMatch[0].split(/[\/\-]/);
+
+    date.value =
+        `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
+}
+
+    scanReceiptBtn.textContent = "🔍 Scan Receipt";
+    // ===== AI Receipt Analysis Card =====
+
+document.getElementById("receiptAnalysis").style.display = "block";
+
+document.getElementById("aiMerchant").textContent =
+    description.value || "-";
+
+document.getElementById("aiAmount").textContent =
+    amount.value || "-";
+
+document.getElementById("aiDate").textContent =
+    date.value || "-";
+    // ===== AI Spending Insight =====
+let aiSummary = document.getElementById("aiSummary");
+
+if (!aiSummary) {
+    aiSummary = document.createElement("div");
+    aiSummary.id = "aiSummary";
+
+    aiSummary.style.marginTop = "12px";
+    aiSummary.style.padding = "10px";
+    aiSummary.style.borderRadius = "10px";
+    aiSummary.style.background = "rgba(99, 102, 241, 0.12)";
+
+    document.getElementById("aiDate").parentElement.appendChild(aiSummary);
+}
+
+aiSummary.innerHTML = `
+    🤖 <strong>AI Insight:</strong>
+    ${aiResult?.summary || "No insight available."}
+`;
+
+const aiItems = document.getElementById("aiItems");
+
+aiItems.innerHTML = "";
+
+purchasedItems.forEach(item => {
+
+    const li = document.createElement("li");
+
+    li.textContent = item;
+
+    aiItems.appendChild(li);
+
+});
+
+});

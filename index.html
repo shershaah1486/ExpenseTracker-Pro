@@ -50,6 +50,7 @@ content="https://trackwise-psi.vercel.app/">
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-36PLW0Z217"></script>
@@ -354,6 +355,41 @@ type="date">
 <button id="addBtn">
 ➕ Add Transaction
 </button>
+<div class="receipt-box">
+
+<h3>📷 Scan Receipt</h3>
+
+<input
+type="file"
+id="receiptInput"
+accept="image/*">
+
+<img
+id="receiptPreview"
+style="display:none;max-width:100%;margin-top:10px;border-radius:10px;">
+
+<button id="scanReceiptBtn">
+
+🔍 Scan Receipt
+
+</button>
+<div id="receiptAnalysis" class="receipt-analysis" style="display:none;">
+
+    <h3>🤖 AI Receipt Analysis</h3>
+
+    <p><strong>🏪 Merchant:</strong> <span id="aiMerchant">-</span></p>
+
+    <p><strong>💰 Amount:</strong> <span id="aiAmount">-</span></p>
+
+    <p><strong>📅 Date:</strong> <span id="aiDate">-</span></p>
+
+    <p><strong>🛒 Items:</strong></p>
+
+    <ul id="aiItems"></ul>
+
+</div>
+
+</div>
 </div>
 <div class="right-panel">
     <h2>Expense Breakdown</h2>
