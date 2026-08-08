@@ -1796,5 +1796,7 @@ purchasedItems.forEach(item => {
     aiItems.appendChild(li);
 
 });
+// Save scanned receipt as a transaction
+saveTransaction();
 
 });
